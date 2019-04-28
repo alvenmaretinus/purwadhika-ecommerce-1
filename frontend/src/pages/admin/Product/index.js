@@ -31,7 +31,7 @@ class Product extends Component {
           ...state.formData.variants,
           {
             name: '',
-            images: [],
+            images: null,
             description: '',
             weight: 0,
             quantity: 0,
@@ -47,44 +47,91 @@ class Product extends Component {
     const { formData: { variants } } = this.state;
     variants.splice(index, 1);
     this.setState(state => ({
-        formData: {
-          ...state.formData,
-          variants
-        }
+      formData: {
+        ...state.formData,
+        variants
       }
+    }
     ));
+  };
+
+  setVariantData(variants) {
+    this.setState(state => ({
+      formData: {
+        ...state.formData,
+        variants
+      }
+    }));
   }
 
   onVariantNameChange = index => event => {
     const { formData: { variants } } = this.state;
     variants[index].name = event.target.value;
 
-    this.setState(state => ({
-        formData: {
-          ...state.formData,
-          variants
-        }
-      }
-    ));
+    this.setVariantData(variants);
   };
 
-  onWeightChange = index => event => {
-    const { formData: { variants } } = this.state;
-    variants[index].weight = event.target.value;
+  onWeightChange = index => ({ target: { value } }) => {
+    if (isNaN(value)) {
+      return;
+    }
 
-    this.setState(state => {
-      return {
-        formData: {
-          ...state.formData,
-          variants
-        }
-      }
-    });
+    const { formData: { variants } } = this.state;
+    variants[index].weight = parseInt(value, 10) || 0;
+
+    this.setVariantData(variants);
+  };
+
+  onDescriptionChange = index => event => {
+    const { formData: { variants } } = this.state;
+    variants[index].description = event.target.value;
+
+    this.setVariantData(variants);
+  };
+
+  onQuantityChange = index => ({ target: { value } }) => {
+    if (isNaN(value)) {
+      return;
+    }
+
+    const { formData: { variants } } = this.state;
+    variants[index].quantity = parseInt(value, 10) || 0;
+
+    this.setVariantData(variants);
+  };
+
+  onPriceChange = index => ({ target: { value } }) => {
+    if (isNaN(value)) {
+      return;
+    }
+
+    const { formData: { variants } } = this.state;
+    variants[index].price = parseInt(value, 10) || 0;
+
+    this.setVariantData(variants);
+  };
+
+  onDiscountChange = index => ({ target: { value } }) => {
+    if (isNaN(value)) {
+      return;
+    }
+
+    const { formData: { variants } } = this.state;
+    variants[index].discount = parseInt(value, 10) || 0;
+
+    this.setVariantData(variants);
+  };
+
+  onImagesChange = index => ({ target: files }) => {
+    const { formData: { variants } } = this.state;
+    variants[index].images = files;
+
+    this.setVariantData(variants);
   };
 
   render() {
     const { formData } = this.state;
-
+console.log(this.state.formData)
     return (
       <Fragment>
         <ProductForm
@@ -94,6 +141,11 @@ class Product extends Component {
           deleteVariant={this.deleteVariant}
           onVariantNameChange={this.onVariantNameChange}
           onWeightChange={this.onWeightChange}
+          onQuantityChange={this.onQuantityChange}
+          onPriceChange={this.onPriceChange}
+          onDiscountChange={this.onDiscountChange}
+          onDescriptionChange={this.onDescriptionChange}
+          onImagesChange={this.onImagesChange}
         />
       </Fragment>
     );

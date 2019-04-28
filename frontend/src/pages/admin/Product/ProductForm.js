@@ -13,6 +13,10 @@ class ProductForm extends PureComponent {
     this.props.addVariant();
   }
 
+  onFormSubmit = e => {
+    e.preventDefault();
+  };
+
   render () {
     const {
       data: {
@@ -22,12 +26,17 @@ class ProductForm extends PureComponent {
       onNameChange,
       onVariantNameChange,
       onWeightChange,
+      onDescriptionChange,
+      onQuantityChange,
+      onPriceChange,
+      onDiscountChange,
+      onImagesChange,
       deleteVariant,
     } = this.props;
     const { hasVariant } = this.state;
 
     return (
-      <form encType="multipart/form-data">
+      <form encType="multipart/form-data" onSubmit={this.onFormSubmit}>
         <label htmlFor="name">Name</label>
         <input type="text" id="name" value={name} onChange={onNameChange} />
         <br />
@@ -42,10 +51,14 @@ class ProductForm extends PureComponent {
           )
         }
         {variants.length > 0 && 
-          variants.map(({ name, weight }, index) => (
+          variants.map(({ name, weight, description, quantity, price, discount }, index) => (
             <Fragment key={index}>
-              { hasVariant && <h3>Variant {name}</h3>}
-              <button type="button" onClick={deleteVariant(index)}>Delete Variant</button>
+              { hasVariant && (
+                <Fragment>
+                  <h3>Variant {name}</h3>
+                  <button type="button" onClick={deleteVariant(index)}>Delete Variant</button>
+                </Fragment>
+              )}
               <br />
               <label htmlFor={`variantName${index}`}>Variant Name</label>
               <input
@@ -57,12 +70,47 @@ class ProductForm extends PureComponent {
               <br />
               <label htmlFor={`weight${index}`}>Weight</label>
               <input
-                type="number"
+                type="text"
                 id={`weight${index}`}
                 value={weight}
                 onChange={onWeightChange(index)}
               />gr
               <br />
+              <label htmlFor={`quantity${index}`}>Quantity</label>
+              <input
+                type="text"
+                id={`quantity${index}`}
+                value={quantity}
+                onChange={onQuantityChange(index)}
+              />pcs
+              <br />
+              <label htmlFor={`price${index}`}>Price</label>
+              Rp<input
+                type="text"
+                id={`price${index}`}
+                value={price}
+                onChange={onPriceChange(index)}
+              />
+              <br />
+              <label htmlFor={`discount${index}`}>Discount</label>
+              <input
+                type="text"
+                id={`discount${index}`}
+                value={discount}
+                onChange={onDiscountChange(index)}
+              />%
+              <br />
+              <label htmlFor={`description${index}`}>Description</label>
+              <textarea
+                id={`description${index}`}
+                cols="30"
+                rows="10"
+                value={description}
+                onChange={onDescriptionChange(index)}
+              />
+              <br />
+              <input type="file" multiple onChange={onImagesChange(index)} />
+              <button>Submit</button>
             </Fragment>
           ))
         }
