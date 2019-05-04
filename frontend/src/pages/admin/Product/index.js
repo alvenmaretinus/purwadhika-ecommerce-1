@@ -1,5 +1,8 @@
 import React, { Component, Fragment } from 'react';
 import ProductForm from './ProductForm';
+import slugify from 'slugify';
+import uniqid from 'uniqid';
+import path from 'path'
 
 class Product extends Component {
   constructor() {
@@ -9,7 +12,8 @@ class Product extends Component {
         id: '',
         name: '',
         variants: [],
-      }
+      },
+      formImages: {},
     };
   }
 
@@ -124,21 +128,44 @@ class Product extends Component {
 
   onImagesChange = index => ({ target: files }) => {
     const { formData: { variants } } = this.state;
-    variants[index].images = files;
 
+    const images = files.files;
+    const imageNames = [];
+    const formImages = {};
+    for (let i = 0; i < images.length; i++) {
+      const fileNameWithoutExt = path.basename(images[i].name, path.extname(images[i].name));
+      const imageName = `${uniqid(`${slugify(fileNameWithoutExt.toLowerCase())}-`)}${path.extname(images[i].name)}`;
+      imageNames.push(imageName);
+      formImages[imageName] = images[i];
+    }
+    variants[index].images = imageNames;
     this.setVariantData(variants);
+    this.setState({ formImages });
+  };
+
+  resetForm = () => {
+    this.setState({
+      formData: {
+        id: '',
+        name: '',
+        variants: [],
+      },
+      formImages: {},
+    });
   };
 
   render() {
-    const { formData } = this.state;
-console.log(this.state.formData)
+    const { formData, formImages } = this.state;
+
     return (
       <Fragment>
         <ProductForm
           data={formData}
+          images={formImages}
           onNameChange={this.onNameChange}
           addVariant={this.addVariant}
           deleteVariant={this.deleteVariant}
+          resetForm={this.resetForm}
           onVariantNameChange={this.onVariantNameChange}
           onWeightChange={this.onWeightChange}
           onQuantityChange={this.onQuantityChange}
