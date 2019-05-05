@@ -9,13 +9,19 @@ const storage = multer.diskStorage({
     callback(null, './public/img/products');
   },
   filename: function (req, file, callback) {
+    console.log(file.fieldname)
     callback(null, file.fieldname);
   }
 })
 const upload = multer({ storage })
 
 router.get('/', (req, res) => {
-  res.send('halaman produk')
+  Product.find({}, (err, data) => {
+    if (err) {
+      res.send(500)
+    }
+    res.send(data)
+  })
 })
 
 router.post('/', upload.any(), (req, res) => {
@@ -28,12 +34,37 @@ router.post('/', upload.any(), (req, res) => {
   }).save()
     .then(() => {
       console.log('data berhasil disimpan ke database')
-      res.sendStatus(200)
+      res.send(200)
     })
     .catch(err => {
       console.log(err)
-      res.sendStatus(500)
+      res.send(500)
     })
+})
+
+router.post('/:id', upload.any(), (req, res) => {
+  const { name, variants } = req.body
+  const { id } = req.params
+
+  Product.findByIdAndUpdate(id, { name, variants: JSON.parse(variants) }, err => {
+    if (err) {
+      res.send(500)
+    }
+    console.log('data berhasil diupdate')
+    res.send(200)
+  })
+})
+
+router.delete('/:id', (req, res) => {
+  const { id } = req.params
+
+  Product.findByIdAndDelete(id, err => {
+    if (err) {
+      res.send(500)
+    }
+    console.log('data berhasil dihapus')
+    res.send(200)
+  })
 })
 
 // new Product({

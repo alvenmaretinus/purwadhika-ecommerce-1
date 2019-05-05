@@ -5,20 +5,21 @@ class ProductForm extends Component {
   constructor() {
     super();
     this.state = {
-      hasVariant: null,
       isFormSubmitting: false,
     }
   }
 
   setHasVariant = hasVariant => () => {
-    this.setState({ hasVariant });
-    this.props.addVariant();
+    const { setHasVariant, addVariant } = this.props;
+    
+    setHasVariant(hasVariant);
+    addVariant();
   }
 
   onFormSubmit = e => {
     e.preventDefault();
 
-    const { data: { name, variants }, images, resetForm } = this.props;
+    const { data: { id, name, variants }, images, resetForm, getProducts, setHasVariant } = this.props;
 
     // Prepare FormData
     const config = {
@@ -37,10 +38,11 @@ class ProductForm extends Component {
 
     // Send FormData via AJAX
     this.setState({ isFormSubmitting: true });
-    axios.post('http://localhost:8000/api/products', formData, config)
+    axios.post(`http://localhost:8000/api/products/${id}`, formData, config)
       .then(() => {
         resetForm();
-        this.setState({ hasVariant: null })
+        setHasVariant(null);
+        getProducts();
       })
       .catch(err => {
         console.log(err)
@@ -56,6 +58,7 @@ class ProductForm extends Component {
         name,
         variants
       },
+      hasVariant,
       onNameChange,
       onVariantNameChange,
       onWeightChange,
@@ -66,7 +69,7 @@ class ProductForm extends Component {
       onImagesChange,
       deleteVariant,
     } = this.props;
-    const { hasVariant, isFormSubmitting } = this.state;
+    const { isFormSubmitting } = this.state;
 
     return (
       <form encType="multipart/form-data" onSubmit={this.onFormSubmit}>

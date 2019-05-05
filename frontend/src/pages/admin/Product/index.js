@@ -1,8 +1,10 @@
 import React, { Component, Fragment } from 'react';
-import ProductForm from './ProductForm';
 import slugify from 'slugify';
 import uniqid from 'uniqid';
 import path from 'path'
+import ProductForm from './ProductForm';
+import ProductView from './ProductView';
+import axios from 'axios';
 
 class Product extends Component {
   constructor() {
@@ -14,8 +16,21 @@ class Product extends Component {
         variants: [],
       },
       formImages: {},
+      hasVariant: null,
+      products: null
     };
   }
+
+  getProducts = () => {
+    axios.get('http://localhost:8000/api/products')
+      .then(res => {
+        this.setState({ products: res.data })
+      })
+  };
+
+  setHasVariant = hasVariant => {
+    this.setState({ hasVariant });
+  };
 
   onNameChange = event => {
     event.persist();
@@ -140,7 +155,12 @@ class Product extends Component {
     }
     variants[index].images = imageNames;
     this.setVariantData(variants);
-    this.setState({ formImages });
+    this.setState(state => ({
+      formImages: {
+        ...state.formImages,
+        ...formImages,
+      }
+    }));
   };
 
   resetForm = () => {
@@ -154,8 +174,20 @@ class Product extends Component {
     });
   };
 
+  editForm = ({
+    _id,
+    name,
+    variants
+  }) => {
+    const { formData } = this.state;
+    formData.id = _id;
+    formData.name = name;
+    formData.variants = JSON.parse(JSON.stringify(variants));
+    this.setState({ formData, formImages: {} });
+  }
+
   render() {
-    const { formData, formImages } = this.state;
+    const { formData, formImages, hasVariant, products } = this.state;
 
     return (
       <Fragment>
@@ -163,6 +195,8 @@ class Product extends Component {
           data={formData}
           images={formImages}
           onNameChange={this.onNameChange}
+          hasVariant={hasVariant}
+          setHasVariant={this.setHasVariant}
           addVariant={this.addVariant}
           deleteVariant={this.deleteVariant}
           resetForm={this.resetForm}
@@ -173,6 +207,13 @@ class Product extends Component {
           onDiscountChange={this.onDiscountChange}
           onDescriptionChange={this.onDescriptionChange}
           onImagesChange={this.onImagesChange}
+          getProducts={this.getProducts}
+        />
+        <ProductView
+          data={products}
+          editForm={this.editForm}
+          setHasVariant={this.setHasVariant}
+          getProducts={this.getProducts}
         />
       </Fragment>
     );
